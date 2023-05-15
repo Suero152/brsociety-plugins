@@ -111,7 +111,6 @@
         messageClone = messageClone.firstChild
 
         let messageContent = messageClone.textContent
-        // TODO: descobrir uma forma de colocar newLine após a quote
         const quote = `[quote]${messageContent}[/quote]`
 
         // Verifica se o chatField possui conteúdo,
