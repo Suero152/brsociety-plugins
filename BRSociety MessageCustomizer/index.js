@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BRSociety Custom Message Plugin
 // @namespace    https://brsociety.club/
-// @version      1.0
+// @version      2.0
 // @description  Plugin para enviar mensagens com customização.
 // @author       Suero & Anekin
 // @match        https://brsociety.club/
