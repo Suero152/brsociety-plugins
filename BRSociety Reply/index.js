@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BRSociety Reply Plugin
 // @namespace    https://brsociety.club/
-// @version      2.1
+// @version      2.2
 // @description  Plugin para implementação de um botão para responder no chat do site.
 // @author       Suero & Anekin
 // @match        https://brsociety.club/
