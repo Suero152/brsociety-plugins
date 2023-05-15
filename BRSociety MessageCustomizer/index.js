@@ -59,7 +59,7 @@
             ii;
 
         for (ii = 0; ii < length; ii++) {
-            colors.push({ r: Math.floor(r), b: Math.floor(g), g: Math.floor(b) });
+            colors.push({ r: Math.floor(r), b: Math.floor(b), g: Math.floor(g) });
             r = r + rIncr;
             g = g + gIncr;
             b = b + bIncr;
