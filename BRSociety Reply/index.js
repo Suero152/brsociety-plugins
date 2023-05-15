@@ -111,27 +111,25 @@
         messageClone = messageClone.firstChild
 
         let messageContent = messageClone.textContent
-        // TODO: descobrir uma forma de colocar newLine após a quote
         const quote = `[quote]${messageContent}[/quote]`
 
         // Verifica se o chatField possui conteúdo,
         // para não apagar caso o usuário já tenha digitado algo
-        if (chatField.textContent.length) {
-          let chatFieldContent = chatField.textContent
+        const [, existingChatFieldContent] = /^(?: )?(?:\[quote\].+\[\/quote\])?(?:\n+| +)?(.+)/.exec(chatField.textContent) || []
 
-          if (chatField.textContent.includes('[quote]')) {
-            chatField.textContent = chatFieldContent.replace(/\[quote\].+\[\/quote\]/, quote)
-          } else {
-            chatField.textContent = quote + chatFieldContent
-          }
+        chatField.textContent = quote
+
+        // Faz a quebra de linha no final do quote. Infelizmente foi necessário essas duas formas diferentes.
+        if (existingChatFieldContent) {
+          // Caso o usuário tenha digitado algo antes da quote, cria um p e insere o conteúdo digitado
+          chatField.appendChild(document.createElement('p'))
+          chatField.lastChild.textContent = existingChatFieldContent
         } else {
-          chatField.textContent = quote
+          // Caso não tenha nenhum conteúdo digitado, apenas adiciona uma quebra de linha no final
+          chatField.appendChild(document.createElement('br'))
+          chatField.appendChild(document.createElement('br'))
+          chatField.lastChild.textContent = ' '
         }
-
-        // Faz a quebra de linha no final do quote
-        chatField.appendChild(document.createElement('br'))
-        chatField.appendChild(document.createElement('br'))
-        chatField.lastChild.textContent = ' '
 
         const end = chatField.textContent.length
 
