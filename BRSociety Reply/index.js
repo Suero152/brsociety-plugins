@@ -128,6 +128,11 @@
           chatField.textContent = quote
         }
 
+        // Faz a quebra de linha no final do quote
+        chatField.appendChild(document.createElement('br'))
+        chatField.appendChild(document.createElement('br'))
+        chatField.lastChild.textContent = ' '
+
         const end = chatField.textContent.length
 
         Cursor.setCurrentCursorPosition(end, chatField)
