@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BRSociety Custom Message Plugin
 // @namespace    https://brsociety.club/
-// @version      2.2.1
+// @version      3.0
 // @description  Plugin para enviar mensagens com customização.
 // @author       Suero & Anekin
 // @match        https://brsociety.club/
@@ -28,6 +28,12 @@
             enabled: false,
             startColor: '#ba0000',
             endColor: '#7d0000'
+        },
+
+        fontConfig: {
+            bold: false,
+            italic: false,
+            underlined: false
         }
 
     }
@@ -147,19 +153,18 @@
                 const citation = match ? match[0] : "";
                 const messageWithoutCitation = config.data.message.replace(quoteRegex, "").trim();
 
+                
                 if (_config.rainbowMode) {
-                    newMessage = `${citation} ${rainbowifyText(messageWithoutCitation)}`;
-                    config.data.message = newMessage
-                    return config;
+                    newMessage = `${rainbowifyText(messageWithoutCitation)}`;
+                }else if(_config.gradientMode.enabled) {
+                    newMessage = `${textFader(_config.gradientMode.startColor, _config.gradientMode.endColor, messageWithoutCitation)}`;
+                }else{
+                    newMessage = `[color=${_config.colorCode}]${messageWithoutCitation}[/color]`;
                 }
 
-                if (_config.gradientMode.enabled) {
-                    newMessage = `${citation} ${textFader(_config.gradientMode.startColor, _config.gradientMode.endColor, messageWithoutCitation)}`;
-                    config.data.message = newMessage
-                    return config;
-                }
-
-                newMessage = `${citation} [color=${_config.colorCode}]${messageWithoutCitation}[/color]`;
+                _config.fontConfig.bold && (newMessage = `[b]${newMessage}[/b]`);_config.fontConfig.italic && (newMessage = `[i]${newMessage}[/i]`);_config.fontConfig.underlined && (newMessage = `[u]${newMessage}[/u]`)
+                newMessage = `${citation} ${newMessage}`
+                
                 config.data.message = newMessage
                 return config;
 
