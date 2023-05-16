@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BRSociety Custom Message Plugin
 // @namespace    https://brsociety.club/
-// @version      2.1
+// @version      2.2
 // @description  Plugin para enviar mensagens com customização.
 // @author       Suero & Anekin
 // @match        https://brsociety.club/
@@ -18,8 +18,9 @@
     const _config = {
         // Main color which will be automatically applied. ( Won't be applied if any other mode is enabled)
         colorCode: '#ff2626',
+        rainbowMode: true,
         gradientMode: {
-            enabled: true,
+            enabled: false,
             startColor: '#ba0000',
             endColor: '#7d0000'
         }
@@ -68,9 +69,34 @@
         return colors;
     };
 
+    // Creates LERP fade between multiple colors, used to make the rainbow effect.
+    var multiColorFade = function (colors, length) {
+        var colorIncr = (length - 1) / (colors.length - 1),
+            ii,
+            len = Math.min(colors.length - 1, length),
+            startPos = 0,
+            endPos = 1,
+            retColors = [],
+            tmpColors,
+            dist;
+
+        for (ii = 0; ii < len; ii++) {
+            endPos = Math.max(startPos + 2, endPos + colorIncr);
+            dist = Math.round(endPos) - Math.round(startPos);
+
+            tmpColors = twoColorFade(colors[ii], colors[ii + 1], dist);
+            retColors.pop(); // remove last color
+            retColors = retColors.concat(tmpColors);
+
+            startPos = Math.round(endPos) - 1;
+        }
+        return retColors;
+    };
+
+
     // Format a string to be faded on BBCode formatting.
-    function stringFader(startColor, endColor, string) {
-        let colorsArray = twoColorFade(hexToRgb(_config.gradientMode.startColor), hexToRgb(_config.gradientMode.endColor), string.length)
+    function textFader(startColor, endColor, string) {
+        let colorsArray = twoColorFade(hexToRgb(startColor), hexToRgb(endColor), string.length)
         let fadedString = ''
 
         for (let i = 0; i < string.length; i++) {
@@ -83,6 +109,25 @@
             }
         }
         return fadedString
+    }
+
+    // Format a string to be rainbowified on BBCode formatting.
+    function rainbowifyText(string) {
+        let colorsArray = multiColorFade([{'r': 255,'g':0,'b':0}, {'r':255,'g':127,'b':0},{'r':255,'g':255,'b':0 },{'r':0,'g':255,'b': 0 }, { 'r': 0, 'g': 255, 'b': 255 }, { 'r': 0, 'g': 0, 'b': 255 }, { 'r': 139, 'g': 0, 'b': 255 }]
+            , string.length)
+        let rainbowifiedString = ''
+        console.log(colorsArray)
+        for (let i = 0; i < string.length; i++) {
+            const char = string.charAt(i)
+            
+            if (char == ' ') {
+                rainbowifiedString += char
+            } else {
+                rainbowifiedString += `[color=${rgbToHex(colorsArray[i])}]${char}[/color]`
+            }
+        }
+        console.log(rainbowifiedString)
+        return rainbowifiedString
     }
 
 
@@ -98,8 +143,15 @@
                 const citation = match ? match[0] : "";
                 const messageWithoutCitation = config.data.message.replace(quoteRegex, "").trim();
 
+                if (_config.rainbowMode) {
+                    console.log('rainbow mode is enabled.')
+                    newMessage = `${citation} ${rainbowifyText(messageWithoutCitation)}`;
+                    config.data.message = newMessage
+                    return config;
+                }
+
                 if (_config.gradientMode.enabled) {
-                    newMessage = `${citation} ${stringFader(_config.gradientMode.startColor,_config.gradientMode.endColor,messageWithoutCitation)}`;
+                    newMessage = `${citation} ${textFader(_config.gradientMode.startColor, _config.gradientMode.endColor, messageWithoutCitation)}`;
                     config.data.message = newMessage
                     return config;
                 }
