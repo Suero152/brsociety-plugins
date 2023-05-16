@@ -16,9 +16,14 @@
     'use strict';
 
     const _config = {
-        // Main color which will be automatically applied. ( Won't be applied if any other mode is enabled)
-        colorCode: '#ff2626',
-        rainbowMode: true,
+
+        // Main colorCode which will be automatically applied. ( Won't be applied if any other mode is enabled)
+        colorCode: '#FFFFFF',
+
+        // Enables or disable rainbow mode.
+        rainbowMode: false,
+
+        // GradientMode Configs
         gradientMode: {
             enabled: false,
             startColor: '#ba0000',
