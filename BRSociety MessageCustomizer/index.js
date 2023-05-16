@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BRSociety Custom Message Plugin
 // @namespace    https://brsociety.club/
-// @version      2.2
+// @version      2.2.1
 // @description  Plugin para enviar mensagens com customização.
 // @author       Suero & Anekin
 // @match        https://brsociety.club/
@@ -131,7 +131,6 @@
                 rainbowifiedString += `[color=${rgbToHex(colorsArray[i])}]${char}[/color]`
             }
         }
-        console.log(rainbowifiedString)
         return rainbowifiedString
     }
 
@@ -149,7 +148,6 @@
                 const messageWithoutCitation = config.data.message.replace(quoteRegex, "").trim();
 
                 if (_config.rainbowMode) {
-                    console.log('rainbow mode is enabled.')
                     newMessage = `${citation} ${rainbowifyText(messageWithoutCitation)}`;
                     config.data.message = newMessage
                     return config;
