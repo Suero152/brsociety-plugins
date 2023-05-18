@@ -1,42 +1,50 @@
 // ==UserScript==
 // @name         BRSociety Custom Message Plugin
 // @namespace    https://brsociety.club/
-// @version      3.0
+// @version      3.3
 // @description  Plugin para enviar mensagens com customização.
-// @author       Suero & Anekin
+// @author       Suero
 // @match        https://brsociety.club/
 // @icon         https://brsociety.club/img/logo.png
 // @grant        none
 // @license      MIT
 // ==/UserScript==
-// Criado por: https://brsociety.club/users/Suero & https://brsociety.club/users/anekin
+// Criado por: https://brsociety.club/users/Suero
+// Colaboradores: https://brsociety.club/users/anekin
 // Aproveite o plugin <3
 
 (function () {
-    'use strict';
-
+    'use strict'
+      
+    // CONFIGURAÇÃO DO PLUGIN
+  
+    // ATENÇÃO: O código das cores precisa de aspas e apenas um # no começo, por exemplo: '#ffffff'. Sem as aspas não irá funcionar!
+    // ATENÇÃO: Os valores true ou false não precisam de aspas
+    // Para pegar o código de uma cor, acesse esse site: https://htmlcolorcodes.com/color-picker/
+  
     const _config = {
-
-        // Main colorCode which will be automatically applied. ( Won't be applied if any other mode is enabled)
-        colorCode: '#FFFFFF',
-
-        // Enables or disable rainbow mode.
-        rainbowMode: false,
-
-        // GradientMode Configs
-        gradientMode: {
-            enabled: false,
-            startColor: '#ba0000',
-            endColor: '#7d0000'
-        },
-
-        fontConfig: {
-            bold: false,
-            italic: false,
-            underlined: false
-        }
-
+      // Cor única
+      colorCode: '#FF5733', // <- Mude o valor amarelo entre aspas para definir uma cor para o seu texto
+    
+      // Arco-íris
+      rainbowMode: false, // <- Mude para true para ativar o modo arco-íris.
+    
+      // Gradiente
+      gradientMode: {
+        enabled: false, // <- Mude para true para ativar o gradiente.
+        startColor: '#ff40aa', // <- Cor 1 do gradiente.
+        endColor: '#5bf0f5' // <- Cor 2 do gradiente.
+      },
+    
+      // Configurações de estilo
+      fontConfig: {
+        bold: false, // <- Mude para true para ativar o negrito.
+        italic: false, // <- Mude para true para ativar o itálico.
+        underlined: false // <- Mude para true para ativar o sublinhado.
+      }
     }
+    
+    // FIM DA CONFIGURAÇÃO. NÃO ALTERE AS LINHAS ABAIXO, A MENOS QUE SAIBA O QUE ESTÁ FAZENDO!!
 
     // Function required by rgbToHex
     function componentToHex(c) {
@@ -109,13 +117,21 @@
     function textFader(startColor, endColor, string) {
         let colorsArray = twoColorFade(hexToRgb(startColor), hexToRgb(endColor), string.length)
         let fadedString = ''
+        let ignore = false
 
         for (let i = 0; i < string.length; i++) {
             const char = string.charAt(i)
 
-            if (char == ' ') {
+            if (ignore && char == '}') {
+                ignore = false
+                continue;
+            }
+
+            if (char == ' ' || ignore) {
                 fadedString += char
-            } else {
+            } else if (char == '{') {
+                ignore = true
+            } else if (!ignore) {
                 fadedString += `[color=${rgbToHex(colorsArray[i])}]${char}[/color]`
             }
         }
@@ -124,18 +140,27 @@
 
     // Format a string to be rainbowified on BBCode formatting.
     function rainbowifyText(string) {
-        let colorsArray = multiColorFade([{'r': 255,'g':0,'b':0}, {'r':255,'g':127,'b':0},{'r':255,'g':255,'b':0 },{'r':0,'g':255,'b': 0 }, { 'r': 0, 'g': 255, 'b': 255 }, { 'r': 0, 'g': 0, 'b': 255 }, { 'r': 139, 'g': 0, 'b': 255 }]
+        let colorsArray = multiColorFade([{ 'r': 255, 'g': 0, 'b': 0 }, { 'r': 255, 'g': 127, 'b': 0 }, { 'r': 255, 'g': 255, 'b': 0 }, { 'r': 0, 'g': 255, 'b': 0 }, { 'r': 0, 'g': 255, 'b': 255 }, { 'r': 0, 'g': 0, 'b': 255 }, { 'r': 139, 'g': 0, 'b': 255 }]
             , string.length)
         let rainbowifiedString = ''
-        console.log(colorsArray)
+        let ignore = false
+
         for (let i = 0; i < string.length; i++) {
             const char = string.charAt(i)
-            
-            if (char == ' ') {
+
+
+            if (ignore && char == '}') {
+                ignore = false
+                continue;
+            }
+            if (char == ' ' || ignore) {
                 rainbowifiedString += char
-            } else {
+            } else if (char == '{') {
+                ignore = true
+            } else if (!ignore) {
                 rainbowifiedString += `[color=${rgbToHex(colorsArray[i])}]${char}[/color]`
             }
+
         }
         return rainbowifiedString
     }
@@ -148,23 +173,35 @@
             let message = config.data.message
             if (!message.match('/msg') && !message.match('/gift')) {
                 let newMessage
-                const quoteRegex = /\[quote\](.*?)\[\/quote\]/;
-                const match = config.data.message.match(quoteRegex);
-                const citation = match ? match[0] : "";
-                const messageWithoutCitation = config.data.message.replace(quoteRegex, "").trim();
 
-                
+                const quoteRegex = /\[quote\](.*?)\[\/quote\]/
+                const quote = message.match(quoteRegex) ? message.match(quoteRegex)[0] : "";
+                let messageWithoutCitation = message.replace(quoteRegex, "");
+
+                let specialTags = {
+                    imgs: messageWithoutCitation.match(/\[img\]([^\[]+)\[\/img\]/g),
+                    urls: messageWithoutCitation.match(/\[url=([^\]]+)\]([^\[]+)\[\/url\]/g),
+                }
+
+                for (const [index, value] of Object.entries(specialTags)) {
+                    if (!value || !_config.rainbowMode || !_config.gradientMode) continue;
+                    for (let detection of value) {
+
+                        messageWithoutCitation = messageWithoutCitation.replace(detection, `{${detection}}`)
+
+                    }
+                }
+
                 if (_config.rainbowMode) {
                     newMessage = `${rainbowifyText(messageWithoutCitation)}`;
-                }else if(_config.gradientMode.enabled) {
+                } else if (_config.gradientMode.enabled) {
                     newMessage = `${textFader(_config.gradientMode.startColor, _config.gradientMode.endColor, messageWithoutCitation)}`;
-                }else{
+                } else {
                     newMessage = `[color=${_config.colorCode}]${messageWithoutCitation}[/color]`;
                 }
 
-                _config.fontConfig.bold && (newMessage = `[b]${newMessage}[/b]`);_config.fontConfig.italic && (newMessage = `[i]${newMessage}[/i]`);_config.fontConfig.underlined && (newMessage = `[u]${newMessage}[/u]`)
-                newMessage = `${citation} ${newMessage}`
-                
+                _config.fontConfig.bold && (newMessage = `[b]${newMessage}[/b]`); _config.fontConfig.italic && (newMessage = `[i]${newMessage}[/i]`); _config.fontConfig.underlined && (newMessage = `[u]${newMessage}[/u]`)
+                newMessage = `${quote} ${newMessage}`
                 config.data.message = newMessage
                 return config;
 
