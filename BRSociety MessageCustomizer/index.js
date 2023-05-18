@@ -24,7 +24,7 @@
   
     const _config = {
       // Cor única
-      colorCode: '#FF5733', // <- Mude o valor amarelo entre aspas para definir uma cor para o seu texto
+      colorCode: '#FFFFFF', // <- Mude o valor amarelo entre aspas para definir uma cor para o seu texto
     
       // Arco-íris
       rainbowMode: false, // <- Mude para true para ativar o modo arco-íris.
@@ -183,18 +183,22 @@
                     urls: messageWithoutCitation.match(/\[url=([^\]]+)\]([^\[]+)\[\/url\]/g),
                 }
 
-                for (const [index, value] of Object.entries(specialTags)) {
-                    if (!value || !_config.rainbowMode || !_config.gradientMode) continue;
-                    for (let detection of value) {
-
-                        messageWithoutCitation = messageWithoutCitation.replace(detection, `{${detection}}`)
-
-                    }
-                }
-
+                // TODO diminuir as linhas de código abaixo, é desnecessário ter 2 fors.
                 if (_config.rainbowMode) {
+                    for (const [index, value] of Object.entries(specialTags)) {
+                        if(!value) continue;
+                        for (let detection of value) {
+                            messageWithoutCitation = messageWithoutCitation.replace(detection, `{${detection}}`)
+                        }
+                    }
                     newMessage = `${rainbowifyText(messageWithoutCitation)}`;
                 } else if (_config.gradientMode.enabled) {
+                    for (const [index, value] of Object.entries(specialTags)) {
+                        if(!value) continue;
+                        for (let detection of value) {
+                            messageWithoutCitation = messageWithoutCitation.replace(detection, `{${detection}}`)
+                        }
+                    }
                     newMessage = `${textFader(_config.gradientMode.startColor, _config.gradientMode.endColor, messageWithoutCitation)}`;
                 } else {
                     newMessage = `[color=${_config.colorCode}]${messageWithoutCitation}[/color]`;
